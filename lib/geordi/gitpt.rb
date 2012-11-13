@@ -2,13 +2,14 @@ require 'rubygems'
 require 'highline'
 require 'pivotal-tracker'
 require 'yaml'
+require 'git'
 
 module Geordi
   class Gitpt
 
     attr_reader :token, :initials, :settings_file, :deprecated_token_file,
                 :highline, :applicable_stories, :memberships
-    
+
     def initialize
       @highline = HighLine.new
       @settings_file = File.join(ENV['HOME'], '.gitpt')
@@ -27,11 +28,11 @@ module Geordi
     def settings_valid?
       token and token.size > 10
     end
-    
+
     def bold(string)
       HighLine::BOLD + string + HighLine::RESET
     end
-    
+
     def highlight(string)
       bold HighLine::BLUE + string
     end
@@ -90,7 +91,7 @@ module Geordi
             #{HighLine::YELLOW}You are still using #{highlight(deprecated_token_file) + HighLine::YELLOW} which will be deprecated in a future version.
             Please migrate your settings to ~/.gitpt or remove #{deprecated_token_file} for the wizard to cast magic.
           MESSAGE
-          @token = File.read(deprecated_token_file) 
+          @token = File.read(deprecated_token_file)
         end
       end
     end
@@ -134,7 +135,7 @@ module Geordi
           owner = if owner_name
             owners = memberships.select{|member| member.name == owner_name}
             owners.first ? owners.first.initials : '?'
-          else 
+          else
             '?'
           end
 
@@ -162,7 +163,9 @@ module Geordi
           commit_message << ' - '<< message.strip
         end
 
-        exec('git', 'commit', '-m', commit_message)
+        git = Git.open(Rails.root.to_s, :log => Logger.new(STDOUT))
+        git.commit commit_message
+        selected_story.notes.create(:text => "Commit SHA: #{git.object('HEAD').sha}", :noted_at => Time.current)
       end
     end
 
