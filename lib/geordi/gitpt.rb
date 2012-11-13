@@ -162,8 +162,9 @@ module Geordi
         if message.strip != ''
           commit_message << ' - '<< message.strip
         end
-
-        git = Git.open(`pwd`.strip, :log => Logger.new(STDOUT))
+        pwd = `pwd`.strip
+        puts "Working directory: #{pwd}"
+        git = Git.open(pwd)
         git.commit commit_message
         selected_story.notes.create(:text => "Commit SHA: #{git.object('HEAD').sha}", :noted_at => Time.current)
       end
