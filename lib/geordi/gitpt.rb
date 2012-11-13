@@ -163,7 +163,7 @@ module Geordi
           commit_message << ' - '<< message.strip
         end
 
-        git = Git.open(Rails.root.to_s, :log => Logger.new(STDOUT))
+        git = Git.open(`pwd`.strip, :log => Logger.new(STDOUT))
         git.commit commit_message
         selected_story.notes.create(:text => "Commit SHA: #{git.object('HEAD').sha}", :noted_at => Time.current)
       end
