@@ -3,6 +3,7 @@ require 'highline'
 require 'pivotal-tracker'
 require 'yaml'
 require 'git'
+require 'active_support/time'
 
 module Geordi
   class Gitpt
@@ -166,7 +167,8 @@ module Geordi
         puts "Working directory: #{pwd}"
         git = Git.open(pwd)
         git.commit commit_message
-        selected_story.notes.create(:text => "Commit SHA: #{git.object('HEAD').sha}", :noted_at => Time.current)
+        note_at_date = Time.now.in_time_zone("EST").strftime("%m/%d/%Y 05:00 %Z")
+        selected_story.notes.create(:text => "Commit SHA: #{git.object('HEAD').sha}", :noted_at => note_at_date)
       end
     end
 
