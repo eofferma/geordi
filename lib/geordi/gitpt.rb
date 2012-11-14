@@ -168,7 +168,7 @@ module Geordi
         git = Git.open(pwd)
         git.commit commit_message
         note_at_date = Time.now.in_time_zone("EST").strftime("%m/%d/%Y 05:00 %Z")
-        selected_story.notes.create(:text => "Commit SHA: #{git.object('HEAD').sha}", :noted_at => note_at_date)
+        selected_story.notes.create(:text => "#{message.strip} - Commit SHA: #{git.object('HEAD').sha}", :noted_at => note_at_date)
       end
     end
 
