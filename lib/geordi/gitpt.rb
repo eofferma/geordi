@@ -164,12 +164,16 @@ module Geordi
           commit_message << ' - '<< message.strip
         end
         pwd = `pwd`.strip
-        puts "Working directory: #{pwd}"
         git = Git.open(pwd)
         git.commit commit_message
         note_at_date = Time.now.in_time_zone("EST").strftime("%m/%d/%Y 05:00 %Z")
-        selected_story.notes.create(:text => "#{message.strip} - Commit SHA: #{git.object('HEAD').sha}", :noted_at => note_at_date)
+        selected_story.notes.create(:text => "#{message.strip} - Commit SHA on '#{current_branch}': #{git.object('HEAD').sha}", :noted_at => note_at_date)
       end
+    end
+
+    def current_branch
+      b = `git branch`.split("\n").delete_if { |i| i[0] != "*" }
+      b.first.gsub("* ","")
     end
 
     def run
