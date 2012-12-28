@@ -165,15 +165,54 @@ module Geordi
         end
         pwd = `pwd`.strip
         git = Git.open(pwd)
-        git.commit commit_message
+        git.commit(commit_message)
+        commit_sha = git.object('HEAD').sha
+        message_note = <<-EOF
+          #{message.strip}
+          Commit SHA on '#{current_branch}': #{commit_sha}
+
+          Repositorio: #{url_repo(git)}
+        EOF
         note_at_date = Time.now.in_time_zone("EST").strftime("%m/%d/%Y 05:00 %Z")
-        selected_story.notes.create(:text => "#{message.strip} - Commit SHA on '#{current_branch}': #{git.object('HEAD').sha}", :noted_at => note_at_date)
+        selected_story.notes.create(:text => message_note, :noted_at => note_at_date)
       end
+    end
+
+    def url_repo(git)
+      remote_origin_url = git.config['remote.origin.url']
+      commit_sha = git.object('HEAD').sha
+      if bitbucket?(remote_origin_url)
+        match_username = /bitbucket.org\/([a-zA-Z0-9]+)\/|bitbucket.org:([a-zA-Z0-9]+)\//.match(remote_origin_url)
+        username = match_username[1] || match_username[2]
+        url_repo = "https://bitbucket.org/#{username}/#{project_name(git)}/changeset/#{commit_sha}"
+      elsif github?(remote_origin_url)
+        match_username = /github.com\/([a-zA-Z0-9]+)\/|github.com:([a-zA-Z0-9]+)\//.match(remote_origin_url)
+        username = match_username[1] || match_username[2]
+        url_repo = "https://github.com/#{username}/#{project_name(git)}/commit/#{commit_sha}"
+      end
+      url_repo
+    end
+
+    def project_name(git)
+      return @project_name unless @project_name.nil?
+      remote_origin_url = git.config['remote.origin.url']
+      m = /\/([a-zA-Z0-9]+)\.git$/.match(remote_origin_url)
+      @project_name = m[1]
     end
 
     def current_branch
       b = `git branch`.split("\n").delete_if { |i| i[0] != "*" }
       b.first.gsub("* ","")
+    end
+
+    def bitbucket?(repo)
+      return false if repo.nil?
+      repo.include?('bitbucket')
+    end
+
+    def github?(repo)
+      return false if repo.nil?
+      repo.include?('github')
     end
 
     def run
