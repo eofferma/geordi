@@ -189,6 +189,10 @@ module Geordi
         match_username = /github.com\/([a-zA-Z0-9]+)\/|github.com:([a-zA-Z0-9]+)\//.match(remote_origin_url)
         username = match_username[1] || match_username[2]
         url_repo = "https://github.com/#{username}/#{project_name(git)}/commit/#{commit_sha}"
+      elsif repositoryhosting?(remote_origin_url)
+        match_username = /https:\/\/([a-zA-Z0-9]+)\.repositoryhosting\.com|ssh:\/\/git@([a-zA-Z0-9]+)\./.match(remote_origin_url)
+        username = match_username[1] || match_username[2]
+        url_repo = "https://#{username}.repositoryhosting.com/trac/#{username}_#{project_name(git)}/changeset/#{commit_sha}"
       end
       url_repo
     end
@@ -214,6 +218,12 @@ module Geordi
       return false if repo.nil?
       repo.include?('github')
     end
+
+    def repositoryhosting?(repo)
+      return false if repo.nil?
+      repo.include?('repositoryhosting')
+    end
+
 
     def run
       load_projects
