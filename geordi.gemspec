@@ -17,5 +17,10 @@ Gem::Specification.new do |s|
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.add_dependency 'pivotal-tracker', '0.5.10'
+  s.add_dependency 'tzinfo', '0.3.37'
+  s.add_dependency 'highline', '1.6.15'
+  s.add_dependency 'activesupport', '3.2.9'
+  s.add_dependency 'git', '1.2.5'
   s.require_paths = ["lib"]
 end

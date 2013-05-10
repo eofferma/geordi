@@ -188,23 +188,22 @@ module Geordi
       if bitbucket?(remote_origin_url)
         match_username = /bitbucket.org\/([a-zA-Z0-9]+)\/|bitbucket.org:([a-zA-Z0-9]+)\//.match(remote_origin_url)
         username = match_username[1] || match_username[2]
-        url_repo = "https://bitbucket.org/#{username}/#{project_name(git)}/changeset/#{commit_sha}"
+        url_repo = "https://bitbucket.org/#{username}/#{project_name(remote_origin_url)}/changeset/#{commit_sha}"
       elsif github?(remote_origin_url)
         match_username = /github.com\/([a-zA-Z0-9]+)\/|github.com:([a-zA-Z0-9]+)\//.match(remote_origin_url)
         username = match_username[1] || match_username[2]
-        url_repo = "https://github.com/#{username}/#{project_name(git)}/commit/#{commit_sha}"
+        url_repo = "https://github.com/#{username}/#{project_name(remote_origin_url)}/commit/#{commit_sha}"
       elsif repositoryhosting?(remote_origin_url)
         match_username = /https:\/\/([a-zA-Z0-9]+)\.repositoryhosting\.com|ssh:\/\/git@([a-zA-Z0-9]+)\./.match(remote_origin_url)
         username = match_username[1] || match_username[2]
-        url_repo = "https://#{username}.repositoryhosting.com/trac/#{username}_#{project_name(git)}/changeset/#{commit_sha}"
+        url_repo = "https://#{username}.repositoryhosting.com/trac/#{username}_#{project_name(remote_origin_url)}/changeset/#{commit_sha}"
       end
       url_repo
     end
 
-    def project_name(git)
+    def project_name(remote_origin_url)
       return @project_name unless @project_name.nil?
-      remote_origin_url = git.config['remote.origin.url']
-      m = /\/([a-zA-Z0-9]+)\.git$/.match(remote_origin_url)
+      m = /\/([a-zA-Z0-9_]+)\.git$/.match(remote_origin_url)
       @project_name = m[1]
     end
 
