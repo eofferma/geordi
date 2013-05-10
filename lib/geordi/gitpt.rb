@@ -11,9 +11,13 @@ module Geordi
     attr_reader :token, :initials, :settings_file, :deprecated_token_file,
                 :highline, :applicable_stories, :memberships
 
-    def initialize
+    def initialize(token_dir = nil)
       @highline = HighLine.new
-      @settings_file = File.join(ENV['HOME'], '.gitpt')
+      unless token_dir.nil?
+	@settings_file = File.join(token_dir, ".gitpt")
+      else 
+        @settings_file = File.join(ENV['HOME'], '.gitpt')
+      end
       @deprecated_token_file = File.join(ENV['HOME'], '.pt_token')
       load_settings
       settings_were_invalid = (not settings_valid?)
