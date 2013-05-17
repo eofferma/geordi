@@ -9,13 +9,13 @@ module Geordi
   class Gitpt
 
     attr_reader :token, :initials, :settings_file, :deprecated_token_file,
-                :highline, :applicable_stories, :memberships
+                :highline, :applicable_stories, :memberships, :create_pivotal_tracker_note
 
     def initialize(token_dir = nil)
       @highline = HighLine.new
       unless token_dir.nil?
-	@settings_file = File.join(token_dir, ".gitpt")
-      else 
+      @settings_file = File.join(token_dir, ".gitpt")
+      else
         @settings_file = File.join(ENV['HOME'], '.gitpt')
       end
       @deprecated_token_file = File.join(ENV['HOME'], '.pt_token')
@@ -90,6 +90,7 @@ module Geordi
         settings = YAML.load(File.read settings_file)
         @initials = settings[:initials]
         @token = settings[:token]
+        @create_pivotal_tracker_note = settings[:create_pivotal_tracker_note]
       else
         if File.exists?(deprecated_token_file)
           highline.say left(<<-MESSAGE)
@@ -162,23 +163,21 @@ module Geordi
       if selected_story
         message = highline.ask("\nAdd an optional message")
         highline.say message
-
         commit_message = "[##{selected_story.id}] #{selected_story.name}"
         if message.strip != ''
-          commit_message << ' - '<< message.strip
+          commit_message = "[##{selected_story.id}] #{message.strip}"
         end
         pwd = `pwd`.strip
         git = Git.open(pwd)
         git.commit(commit_message)
-        commit_sha = git.object('HEAD').sha
-        message_note = <<-EOF
-          #{message.strip}
-          Commit SHA on '#{current_branch}': #{commit_sha}
-
-          Repositorio: #{url_repo(git)}
-        EOF
-        note_at_date = Time.now.in_time_zone("EST").strftime("%m/%d/%Y 05:00 %Z")
-        selected_story.notes.create(:text => message_note, :noted_at => note_at_date)
+        if @create_pivotal_tracker_note
+          message_note = <<-EOF
+            #{message.strip}
+            Repositorio: #{url_repo(git)}
+          EOF
+          note_at_date = Time.now.in_time_zone("EST").strftime("%m/%d/%Y 05:00 %Z")
+          selected_story.notes.create(:text => message_note, :noted_at => note_at_date)
+        end
       end
     end
 
