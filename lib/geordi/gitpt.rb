@@ -76,9 +76,10 @@ module Geordi
       highline.say "Please configure your Pivotal Tracker access.\n\n"
       token = highline.ask bold("Your API key:") + " "
       initials = highline.ask bold("Your PT initials") + " (optional, used for highlighting your stories): "
+      cptn = highline.ask bold("Create Note in Pivotal Tracker") + " (y/n): "
       highline.say "\n"
 
-      settings = { :token => token, :initials => initials }
+      settings = { :token => token, :initials => initials, :create_pivotal_tracker_note => (cptn.downcase == 'y' ? true : false) }
       File.open settings_file, 'w' do |file|
         file.write settings.to_yaml
       end
@@ -90,7 +91,7 @@ module Geordi
         settings = YAML.load(File.read settings_file)
         @initials = settings[:initials]
         @token = settings[:token]
-        @create_pivotal_tracker_note = settings[:create_pivotal_tracker_note]
+        @create_pivotal_tracker_note = settings[:create_pivotal_tracker_note] || false
       else
         if File.exists?(deprecated_token_file)
           highline.say left(<<-MESSAGE)
