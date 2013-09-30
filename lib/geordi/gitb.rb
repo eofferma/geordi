@@ -63,12 +63,15 @@ module Geordi
         selected_task = tasks[numero_tarea - 1]
         print "\n\nIngresa comentario adicional:\n\n"
         mensaje_adicional = gets.chomp.strip
+        commit_msg = "DEFAULT MESSAGE COMMIT"
         if mensaje_adicional.blank?
-          commit_msg = "[#{selected_task.data['id']}] #{selected_task.data['name']}"
+          commit_msg = "#{selected_task.data['name']} [#{selected_task.data['id']}]"
         else
-          commit_msg = "[#{selected_task.data['id']}] #{mensaje_adicional}"
+          commit_msg = "#{mensaje_adicional} [#{selected_task.data['id']}]"
         end
-        system "git commit -m '#{commit_msg}'"
+        pwd = `pwd`.strip
+        git = Git.open(pwd)
+        git.commit(commit_msg)
         break
       end
     end
