@@ -39,7 +39,6 @@ module Geordi
 
     def run
       tasks = []
-      current_user = client.current_user.data
       project = client.project('clubventa')
       project_id = project.data["id"]
       project.tasks("status[]=0&status[]=1&status[]=2&count=0").each do |t|
