@@ -44,6 +44,13 @@ module Geordi
       end
     end
 
+    def to_utf8(str)
+      str = str.force_encoding("UTF-8")
+      return str if str.valid_encoding?
+      str = str.force_encoding("BINARY")
+      str.encode("UTF-8", invalid: :replace, undef: :replace)
+    end
+
     def run
       tasks = []
       project = client.project('clubventa')
@@ -65,7 +72,7 @@ module Geordi
         mensaje_adicional = gets.chomp.strip
         commit_msg = "DEFAULT MESSAGE COMMIT"
         if mensaje_adicional.blank?
-          commit_msg = "#{selected_task.data['name']} [#{selected_task.data['id']}]"
+          commit_msg = "#{to_utf8(selected_task.data['name'])} [#{selected_task.data['id']}]"
         else
           commit_msg = "#{mensaje_adicional} [#{selected_task.data['id']}]"
         end
