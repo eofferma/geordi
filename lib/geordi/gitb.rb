@@ -40,7 +40,7 @@ module Geordi
 
     def print_tasks(tasks)
       tasks.each_with_index do |t, i|
-        puts "#{i+1})\t[#{t.data["id"]}] #{t.data["name"]} - #{status(t.data['status'])}"
+        puts "#{i+1})\t[#{t.data["id"]}] #{to_utf8(t.data["name"])} - #{status(t.data['status'])}"
       end
     end
 
