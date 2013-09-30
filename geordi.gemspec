@@ -9,14 +9,15 @@ Gem::Specification.new do |s|
   s.authors     = ["Henning Koch"]
   s.email       = ["henning.koch@makandra.de"]
   s.homepage    = "http://makandra.com"
-  s.summary     = 'Collection of command line tools we use in our daily work with Ruby, Rails and Linux at makandra.'
-  s.description = 'Collection of command line tools we use in our daily work with Ruby, Rails and Linux at makandra.'
+  s.summary     = 'Fix: Collection of command line tools we use in our daily work with Ruby, Rails and Linux at makandra.'
+  s.description = 'Fix: Collection of command line tools we use in our daily work with Ruby, Rails and Linux at makandra.'
 
   s.rubyforge_project = "geordi"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.add_dependency 'teambox-client'
   s.add_dependency 'pivotal-tracker', '0.5.10'
   s.add_dependency 'tzinfo', '0.3.37'
   s.add_dependency 'highline', '1.6.15'
