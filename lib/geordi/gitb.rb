@@ -48,7 +48,8 @@ module Geordi
       str = str.force_encoding("UTF-8")
       return str if str.valid_encoding?
       str = str.force_encoding("BINARY")
-      str.encode("UTF-8", invalid: :replace, undef: :replace)
+      str.encode("UTF-8", invalid: :replace, undef: :replace, replace: '').
+      chars.select{|i| i.valid_encoding?}.join
     end
 
     def run
