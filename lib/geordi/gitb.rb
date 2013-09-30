@@ -1,5 +1,4 @@
 require 'rubygems'
-require "bundler/setup"
 require 'highline'
 require 'git'
 require 'active_support/time'
