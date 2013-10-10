@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
 require File.join(File.dirname(__FILE__), '../lib/geordi/gitb')
 
-Geordi::Gitb.new("eduardo.offermann@clubventa.cl", "3154634e").run
+Geordi::Gitb.new("<correo aqui>", "<pass aqui>").run
