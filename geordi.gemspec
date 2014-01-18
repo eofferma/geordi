@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'pivotal-tracker', '0.5.10'
   s.add_dependency 'tzinfo', '0.3.38'
   s.add_dependency 'highline', '1.6.15'
-  s.add_dependency 'activesupport', '3.2.9'
+  s.add_dependency 'activesupport'
   s.add_dependency 'git', '1.2.5'
   s.add_dependency(%q<httparty>, ["~> 0.7.4"])
   s.add_dependency(%q<oauth2>)
