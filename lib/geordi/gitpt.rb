@@ -89,8 +89,8 @@ module Geordi
     def load_settings
       if File.exists? settings_file
         settings = YAML.load(File.read settings_file)
-        @initials = settings[:initials]
-        @token = settings[:token]
+        @initials = Base64.decode64 settings[:initials]
+        @token = Base64.decode64 settings[:token]
         @create_pivotal_tracker_note = settings[:create_pivotal_tracker_note] || false
       else
         if File.exists?(deprecated_token_file)
