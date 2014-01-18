@@ -24,6 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'git', '1.2.5'
   s.add_dependency(%q<httparty>, ["~> 0.7.4"])
   s.add_dependency(%q<oauth2>)
-  s.add_dependency(%q<json>, ["~> 1.5.1"])
+  s.add_dependency(%q<json>, ["~> 1.8.1"])
   s.require_paths = ["lib"]
 end
