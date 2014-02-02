@@ -4,12 +4,14 @@ require 'pivotal-tracker'
 require 'yaml'
 require 'git'
 require 'active_support/time'
+require 'active_support/core_ext'
 
 module Geordi
   class Gitpt
 
     attr_reader :token, :initials, :settings_file, :deprecated_token_file,
-                :highline, :applicable_stories, :memberships, :create_pivotal_tracker_note
+                :highline, :applicable_stories, :memberships, :create_commit_in_pivotal,
+                :url_post_commit
 
     def initialize(token_dir = nil)
       @highline = HighLine.new
@@ -76,10 +78,10 @@ module Geordi
       highline.say "Please configure your Pivotal Tracker access.\n\n"
       token = highline.ask bold("Your API key:") + " "
       initials = highline.ask bold("Your PT initials") + " (optional, used for highlighting your stories): "
-      cptn = highline.ask bold("Create Note in Pivotal Tracker") + " (y/n): "
+      cptn = highline.ask bold("Create Commits in Pivotal Tracker") + " (y/n): "
       highline.say "\n"
 
-      settings = { :token => token, :initials => initials, :create_pivotal_tracker_note => (cptn.downcase == 'y' ? true : false) }
+      settings = { :token => token, :initials => initials, :create_commit_in_pivotal => (cptn.downcase == 'y' ? true : false) }
       File.open settings_file, 'w' do |file|
         file.write settings.to_yaml
       end
@@ -91,7 +93,7 @@ module Geordi
         settings = YAML.load(File.read settings_file)
         @initials = Base64.decode64 settings[:initials]
         @token = Base64.decode64 settings[:token]
-        @create_pivotal_tracker_note = settings[:create_pivotal_tracker_note] || false
+        @create_commit_in_pivotal = settings[:create_commit_in_pivotal] || false
       else
         if File.exists?(deprecated_token_file)
           highline.say left(<<-MESSAGE)
@@ -121,7 +123,7 @@ module Geordi
 
       loading 'Connecting to Pivotal Tracker...' do
         projects = project_ids.collect do |project_id|
-          PivotalTracker::Project.find(project_id)
+          @project = PivotalTracker::Project.find(project_id)
         end
 
         @memberships = projects.collect(&:memberships).map(&:all).flatten
@@ -171,14 +173,38 @@ module Geordi
         pwd = `pwd`.strip
         git = Git.open(pwd)
         git.commit(commit_message)
-        if @create_pivotal_tracker_note
-          message_note = <<-EOF
-            #{message.strip}
-            Repositorio: #{url_repo(git)}
-          EOF
-          note_at_date = Time.now.in_time_zone("EST").strftime("%m/%d/%Y 05:00 %Z")
-          selected_story.notes.create(:text => message_note, :noted_at => note_at_date)
+        commit = git.object('HEAD')
+        commit_sha = commit.sha
+        url_repo = url_repo(git)
+
+        @url_post_commit = "https://www.pivotaltracker.com/services/v5/projects/#{@project.id}/stories/#{selected_story.id}/comments?fields=commit_identifier"
+
+        if @create_commit_in_pivotal
+          message = %Q{
+            #{url_repo}
+
+            Commited by: #{commit.author.name}
+
+            #{commit_message}
+          }
+          data_post = {
+            :text => message,
+            :commit_identifier => commit_sha,
+            :commit_type => repo_type(url_repo),
+          }
+          headers = {:content_type => :json, :accept => :json, 'X-TrackerToken' => token}
+          RestClient.post url_post_commit, data_post.to_json, headers
         end
+      end
+    end
+
+    def repo_type(url_repo)
+      if github? url_repo
+        'github'
+      elsif bitbucket? url_repo
+        'bitbucket'
+      else
+        ''
       end
     end
 
