@@ -5,6 +5,7 @@ require 'yaml'
 require 'git'
 require 'active_support/time'
 require 'active_support/core_ext'
+require 'json'
 
 module Geordi
   class Gitpt
@@ -83,17 +84,17 @@ module Geordi
 
       settings = { :token => token, :initials => initials, :create_commit_in_pivotal => (cptn.downcase == 'y' ? true : false) }
       File.open settings_file, 'w' do |file|
-        file.write settings.to_yaml
+        file.write settings.to_json
       end
       load_settings
     end
 
     def load_settings
       if File.exists? settings_file
-        settings = YAML.load(File.read settings_file)
-        @initials = Base64.decode64 settings[:initials]
-        @token = Base64.decode64 settings[:token]
-        @create_commit_in_pivotal = settings[:create_commit_in_pivotal] || false
+        settings = JSON.parse(File.read settings_file)
+        @initials = settings['initials']
+        @token = settings['token']
+        @create_commit_in_pivotal = settings['create_commit_in_pivotal'] || false
       else
         if File.exists?(deprecated_token_file)
           highline.say left(<<-MESSAGE)
